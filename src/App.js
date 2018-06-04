@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import logo from './logo.svg';
 import './App.css';
 
@@ -17,21 +18,20 @@ class App extends React.Component{
              }
             ]
   };
-
-   render(){
+  addNewCard = (cardInfo) => {
+   this.setState(prevState => ({
+    card:prevState.card.concat(cardInfo) 
+   }))
+  };
+  render(){
     return(
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Add User Details for github users</h2>
-        </div>
+      <div>
+        <Form onSubmit={this.addNewCard} />
         <Cardlist cards={this.state.card} />
       </div>
     );
   }
-
 }
-
 
 const Card = (props) => {
  return(
@@ -45,13 +45,34 @@ const Card = (props) => {
  )
 };
 
-
 const Cardlist = (props) => {
   return(
   <div>
    {props.cards.map(card => <Card {...card} />)}
    </div>
   );
+}
+
+class Form extends React.Component{
+ state = {userName : ''}
+ handleSubmit = (event) => {
+  event.preventDefault();
+  console.log("Event " + this.state.userName);
+  //Making an ajax request to github api to get user details using axios js library
+  axios.get(`https://api.github.com/users/${this.state.userName}`).then(resp=>{
+  this.props.onSubmit(resp.data)
+  })
+ };
+  render(){
+    return(
+      <form style={{marginBottom:10}} onSubmit={this.handleSubmit}>
+        <input type="text" 
+        onChange = {(event) => this.setState({userName:event.target.value})}
+        placeholder="Enter Github Username" />
+        <button type="submit" style={{marginLeft:10}}>Add a card </button>
+      </form>
+    )
+  }
 }
 
 export default App;
